@@ -376,7 +376,7 @@ func TestValidatorValidateMachineConfigTemplateDoesNotExist(t *testing.T) {
 	g.Expect(err).To(MatchError("validating template: not found"))
 }
 
-func TestValidateFailureDomains(t *testing.T) {
+func TestValidateFailureDomainsPrerequisites(t *testing.T) {
 	tests := []testConfig{
 		{
 			name:                       "TestValidateFailureDomains with feature flag disabled and with failure domains",

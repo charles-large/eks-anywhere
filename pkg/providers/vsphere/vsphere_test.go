@@ -1604,8 +1604,8 @@ func TestSetupAndValidateUpgradeClusterMissingPrivError(t *testing.T) {
 	provider.validator.vSphereClientBuilder = vscb
 
 	err := provider.SetupAndValidateUpgradeCluster(ctx, cluster, clusterSpec, clusterSpec)
-
-	thenErrorExpected(t, "validating vsphere user privileges: error", err)
+	expectedErrorMsg := fmt.Sprintf("validating vsphere user privileges: error, please refer to %s for required permissions or use -v 3 for full missing permissions", vSpherePermissionDoc)
+	thenErrorExpected(t, expectedErrorMsg, err)
 }
 
 func TestSetupAndValidateCreateWorkloadClusterSuccess(t *testing.T) {

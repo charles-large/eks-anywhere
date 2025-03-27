@@ -51,6 +51,18 @@ type FailureDomain struct {
 	Network string `json:"network"`
 }
 
+// Converts failure domain to vsphere machine config to fit prexisting validation logic
+func (fd *FailureDomain) ToVSphereMachineConfig() *VSphereMachineConfig {
+	return &VSphereMachineConfig{
+		Spec: VSphereMachineConfigSpec{
+			Folder:         fd.Folder,
+			Datastore:      fd.Datastore,
+			ResourcePool:   fd.ResourcePool,
+			ComputeCluster: fd.ComputeCluster,
+		},
+	}
+}
+
 // VSphereDatacenterConfigStatus defines the observed state of VSphereDatacenterConfig.
 type VSphereDatacenterConfigStatus struct { // Important: Run "make generate" to regenerate code after modifying this file
 	// SpecValid is set to true if vspheredatacenterconfig is validated.

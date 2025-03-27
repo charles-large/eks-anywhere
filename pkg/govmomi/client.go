@@ -15,6 +15,7 @@ const (
 	VSphereTypeResourcePool   = "ResourcePool"
 	VSphereTypeDatastore      = "Datastore"
 	VSphereTypeVirtualMachine = "VirtualMachine"
+	VSphereTypeComputeCluster = "ComputeCluster"
 )
 
 type VMOMIAuthorizationManager interface {
@@ -26,6 +27,7 @@ type VMOMIFinder interface {
 	Folder(ctx context.Context, path string) (*object.Folder, error)
 	Network(ctx context.Context, path string) (object.NetworkReference, error)
 	ResourcePool(ctx context.Context, path string) (*object.ResourcePool, error)
+	ClusterComputeResource(ctx context.Context, path string) (*object.ClusterComputeResource, error)
 	VirtualMachine(ctx context.Context, path string) (*object.VirtualMachine, error)
 	Datacenter(ctx context.Context, path string) (*object.Datacenter, error)
 	SetDatacenter(dc *object.Datacenter) *find.Finder
@@ -68,6 +70,8 @@ func (vsc *VMOMIClient) GetPrivsOnEntity(ctx context.Context, path string, objTy
 		vSphereObjectReference, err = vsc.getResourcePool(ctx, path)
 	case VSphereTypeVirtualMachine:
 		vSphereObjectReference, err = vsc.getVirtualMachine(ctx, path)
+	case VSphereTypeComputeCluster:
+		vSphereObjectReference, err = vsc.getComputeCluster(ctx, path)
 	}
 
 	if err != nil {
@@ -125,6 +129,15 @@ func (vsc *VMOMIClient) getResourcePool(ctx context.Context, path string) (types
 
 func (vsc *VMOMIClient) getVirtualMachine(ctx context.Context, path string) (types.ManagedObjectReference, error) {
 	obj, err := vsc.Finder.VirtualMachine(ctx, path)
+	if err != nil {
+		return types.ManagedObjectReference{}, err
+	} else {
+		return obj.Common.Reference(), nil
+	}
+}
+
+func (vsc *VMOMIClient) getComputeCluster(ctx context.Context, path string) (types.ManagedObjectReference, error) {
+	obj, err := vsc.Finder.ClusterComputeResource(ctx, path)
 	if err != nil {
 		return types.ManagedObjectReference{}, err
 	} else {

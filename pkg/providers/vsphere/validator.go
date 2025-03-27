@@ -410,6 +410,13 @@ func (v *Validator) collectSpecMachineConfigs(ctx context.Context, spec *Spec) (
 		machineConfigs = append(machineConfigs, etcdMachineConfig)
 	}
 
+	if spec.VSphereDatacenter.Spec.FailureDomains != nil {
+		for _, failureDomain := range spec.VSphereDatacenter.Spec.FailureDomains {
+			failureDomainConfig := failureDomain.ToVSphereMachineConfig()
+			machineConfigs = append(machineConfigs, failureDomainConfig)
+		}
+	}
+
 	return machineConfigs, nil
 }
 
@@ -489,6 +496,21 @@ func (v *Validator) validateUserPrivs(ctx context.Context, spec *Spec, vuc *conf
 				path:         mc.Spec.Folder,
 			})
 			seen[mc.Spec.Folder] = 1
+		}
+
+		// Only failure domains should have compute clusters
+		if mc.Spec.ComputeCluster != "" {
+			if _, ok := seen[mc.Spec.ComputeCluster]; !ok {
+				// Validate privs on compute cluster
+				requiredPrivAssociations = append(requiredPrivAssociations, PrivAssociation{
+					objectType:   govmomi.VSphereTypeComputeCluster,
+					privsContent: config.VSphereAdminPrivsFile,
+					path:         mc.Spec.ComputeCluster,
+				})
+				seen[mc.Spec.ComputeCluster] = 1
+			}
+			// Skip template priv checks for failure domains
+			continue
 		}
 
 		if _, ok := seen[mc.Spec.Template]; !ok {

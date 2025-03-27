@@ -20,6 +20,7 @@ type VSphereMachineConfigSpec struct {
 	MemoryMiB         int      `json:"memoryMiB"`
 	OSFamily          OSFamily `json:"osFamily"`
 	ResourcePool      string   `json:"resourcePool"`
+	ComputeCluster    string   `json:"computeCluster"`
 	StoragePolicyName string   `json:"storagePolicyName,omitempty"`
 	// Template field is the template to use for provisioning the VM. It must include the Kubernetes
 	// version(s). For example, a template used for Kubernetes 1.27 could be ubuntu-2204-1.27.
