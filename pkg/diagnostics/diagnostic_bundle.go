@@ -87,7 +87,7 @@ func newDiagnosticBundleManagementCluster(af AnalyzerFactory, cf CollectorFactor
 }
 
 func newDiagnosticBundleFromSpec(af AnalyzerFactory, cf CollectorFactory, spec *cluster.Spec, provider providers.Provider,
-	client BundleClient, kubectl *executables.Kubectl, kubeconfig string, writer filewriter.FileWriter,
+	client BundleClient, kubectl *executables.Kubectl, kubeconfig string, writer filewriter.FileWriter, auditLogs bool,
 ) (*EksaDiagnosticBundle, error) {
 	b := &EksaDiagnosticBundle{
 		bundle: &supportBundle{
@@ -122,7 +122,8 @@ func newDiagnosticBundleFromSpec(af AnalyzerFactory, cf CollectorFactory, spec *
 		WithDefaultCollectors().
 		WithFileCollectors([]string{logger.GetOutputFilePath()}).
 		WithPackagesCollectors().
-		WithLogTextAnalyzers()
+		WithLogTextAnalyzers().
+		WithAuditLogs(auditLogs)
 
 	err := b.WriteBundleConfig()
 	if err != nil {
@@ -268,6 +269,15 @@ func (e *EksaDiagnosticBundle) WithHostCollectors(config v1alpha1.Ref) *EksaDiag
 	}
 	e.hostBundle = hostBundle
 	return e.WithDefaultHostCollectors(config)
+}
+
+// WithAuditLogs configures bundle to collect audit logs from control plane nodes.
+func (e *EksaDiagnosticBundle) WithAuditLogs(auditLogs bool) *EksaDiagnosticBundle {
+	if !auditLogs {
+		return e
+	}
+	e.bundle.Spec.Collectors = append(e.bundle.Spec.Collectors, e.collectorFactory.AuditLogCollectors()...)
+	return e
 }
 
 // WithDefaultHostCollectors collects the default collectors that run on the host machine.
